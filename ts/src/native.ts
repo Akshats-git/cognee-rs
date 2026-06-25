@@ -464,7 +464,7 @@ export interface NativeBindings {
 // `cognee_ts_neon.node` in the package root (produced by `npm run build:rust`).
 //
 // The optional dependency package names follow the @neon-rs/load platform key
-// convention: `@cognee-ts/neon-<platform>` (e.g. `@cognee-ts/neon-linux-x64-gnu`).
+// convention: `@cognee/neon-<platform>` (e.g. `@cognee/neon-linux-x64-gnu`).
 // N-API version: napi-6 (Node >= 14.6 / 16.0).  See `engines` in package.json.
 //
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -472,13 +472,13 @@ const { proxy } = require("@neon-rs/load") as typeof import("@neon-rs/load");
 
 // Mapping from @neon-rs/load platform key → optional dependency package name.
 const platforms: Record<string, () => NativeBindings> = {
-  "linux-x64-gnu": () => require("@cognee-ts/neon-linux-x64-gnu"),
-  "linux-arm64-gnu": () => require("@cognee-ts/neon-linux-arm64-gnu"),
-  "linux-x64-musl": () => require("@cognee-ts/neon-linux-x64-musl"),
-  "linux-arm64-musl": () => require("@cognee-ts/neon-linux-arm64-musl"),
-  "darwin-x64": () => require("@cognee-ts/neon-darwin-x64"),
-  "darwin-arm64": () => require("@cognee-ts/neon-darwin-arm64"),
-  "win32-x64-msvc": () => require("@cognee-ts/neon-win32-x64-msvc"),
+  "linux-x64-gnu": () => require("@cognee/neon-linux-x64-gnu"),
+  "linux-arm64-gnu": () => require("@cognee/neon-linux-arm64-gnu"),
+  "linux-x64-musl": () => require("@cognee/neon-linux-x64-musl"),
+  "linux-arm64-musl": () => require("@cognee/neon-linux-arm64-musl"),
+  "darwin-x64": () => require("@cognee/neon-darwin-x64"),
+  "darwin-arm64": () => require("@cognee/neon-darwin-arm64"),
+  "win32-x64-msvc": () => require("@cognee/neon-win32-x64-msvc"),
 };
 
 // Fallback: try the locally-built artifact (produced by `npm run build:rust`).

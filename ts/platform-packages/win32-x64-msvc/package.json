@@ -1,10 +1,14 @@
 {
-  "name": "@cognee-ts/neon-win32-x64-msvc",
+  "name": "@cognee/neon-win32-x64-msvc",
   "version": "0.1.0",
   "description": "Prebuilt cognee native addon for win32-x64-msvc (x86_64-pc-windows-msvc)",
   "main": "index.js",
-  "os": ["win32"],
-  "cpu": ["x64"],
+  "os": [
+    "win32"
+  ],
+  "cpu": [
+    "x64"
+  ],
   "files": [
     "index.js",
     "cognee_ts_neon.node"
@@ -14,5 +18,8 @@
     "type": "git",
     "url": "git+https://github.com/topoteretes/cognee-rs.git",
     "directory": "ts/platform-packages/win32-x64-msvc"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

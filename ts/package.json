@@ -1,14 +1,23 @@
 {
-  "name": "cognee-ts",
+  "name": "@cognee/cognee-ts",
   "version": "0.1.0",
   "description": "Node.js bindings for the cognee AI-memory SDK",
   "license": "MIT OR Apache-2.0",
+  "publishConfig": {
+    "access": "public"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/topoteretes/cognee-rs.git"
   },
   "homepage": "https://www.cognee.ai",
-  "keywords": ["ai", "knowledge-graph", "memory", "rag", "embeddings"],
+  "keywords": [
+    "ai",
+    "knowledge-graph",
+    "memory",
+    "rag",
+    "embeddings"
+  ],
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "scripts": {
@@ -34,13 +43,13 @@
     "dotenv": "^16.6.1"
   },
   "optionalDependencies": {
-    "@cognee-ts/neon-darwin-arm64": "0.1.0",
-    "@cognee-ts/neon-darwin-x64": "0.1.0",
-    "@cognee-ts/neon-linux-arm64-gnu": "0.1.0",
-    "@cognee-ts/neon-linux-arm64-musl": "0.1.0",
-    "@cognee-ts/neon-linux-x64-gnu": "0.1.0",
-    "@cognee-ts/neon-linux-x64-musl": "0.1.0",
-    "@cognee-ts/neon-win32-x64-msvc": "0.1.0"
+    "@cognee/neon-darwin-arm64": "0.1.0",
+    "@cognee/neon-darwin-x64": "0.1.0",
+    "@cognee/neon-linux-arm64-gnu": "0.1.0",
+    "@cognee/neon-linux-arm64-musl": "0.1.0",
+    "@cognee/neon-linux-x64-gnu": "0.1.0",
+    "@cognee/neon-linux-x64-musl": "0.1.0",
+    "@cognee/neon-win32-x64-msvc": "0.1.0"
   },
   "devDependencies": {
     "@types/jest": "^29.5.0",
