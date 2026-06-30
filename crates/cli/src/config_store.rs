@@ -5,7 +5,7 @@ use serde_json::Value;
 use std::collections::BTreeMap;
 use std::fs;
 use std::io::Write;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 const CURRENT_VERSION: u32 = 1;
 
@@ -28,9 +28,23 @@ impl Default for ConfigDocument {
 }
 
 pub fn config_file_path() -> Result<PathBuf, CliError> {
-    let base_dir = dirs::config_dir().ok_or_else(|| {
-        CliError::Runtime("Could not resolve user config directory for cognee-cli".to_string())
-    })?;
+    // Production always resolves the config dir via `dirs::config_dir()` —
+    // unchanged on every platform. Tests set `COGNEE_CONFIG_HOME` to an isolated
+    // absolute temp dir so parallel CLI test processes don't collide on one
+    // shared config file (and race the atomic `config.json[.tmp]` replace).
+    //
+    // We deliberately do NOT key off `XDG_CONFIG_HOME`: honoring it on macOS
+    // would relocate a real user's existing config (which holds durable
+    // credentials with no regeneration path) the moment they have XDG set, and
+    // `dirs` already consults XDG on Linux. Only an *absolute* override is
+    // accepted — a relative one would resolve against the CWD, making config
+    // silently per-directory.
+    let base_dir = match std::env::var_os("COGNEE_CONFIG_HOME") {
+        Some(dir) if !dir.is_empty() && Path::new(&dir).is_absolute() => PathBuf::from(dir),
+        _ => dirs::config_dir().ok_or_else(|| {
+            CliError::Runtime("Could not resolve user config directory for cognee-cli".to_string())
+        })?,
+    };
 
     Ok(base_dir.join("cognee-rust").join("config.json"))
 }
