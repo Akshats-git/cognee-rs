@@ -506,7 +506,7 @@ impl ComponentManager {
                     model_name: settings.embedding_model_name.clone(),
                     dimensions: settings.embedding_dimensions as usize,
                     max_sequence_length: settings.embedding_max_sequence_length as usize,
-                    batch_size: settings.embedding_batch_size as usize,
+                    batch_size: settings.embedding_onnx_batch_size as usize,
                 },
                 huggingface_tokenizer: None,
             }
