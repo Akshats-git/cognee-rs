@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.3](https://github.com/topoteretes/cognee-rs/compare/v0.1.0...v0.1.3) - 2026-07-02
+
+### Added
+
+- Route ollama, mistral, gemini, and custom OpenAI-compatible providers (#30)
+
+### Changed
+
+- Optimize embeddings generation and engines (#34)
+- Consolidate redundant queries and add native pgvector batch search (#36)
+- Eliminate two N+1 query loops (has_edges, update_last_accessed) (#24)
+
+### Fixed
+
+- Enable the HTML loader in the Neon (Node.js) binding for URL ingestion (#50)
+- Fail loudly when NATURAL_LANGUAGE search is unsupported by the backend (#51)
+- Fix reported TypeScript SDK bugs and cross-dataset deduplication (#11)
+
+
 ## [0.1.1](https://github.com/topoteretes/cognee-rs/compare/cognee-models-v0.1.0...cognee-models-v0.1.1) - 2026-06-26
 
 ### Other
