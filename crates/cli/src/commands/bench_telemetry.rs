@@ -72,6 +72,12 @@ where
     S: Subscriber + for<'a> LookupSpan<'a>,
 {
     fn on_new_span(&self, _attrs: &Attributes<'_>, id: &Id, ctx: Context<'_, S>) {
+        // Only track spans that open while armed. A span opened before `arm()`
+        // gets no Timings, so it is ignored. This keeps per-phase attribution
+        // clean and skips all work when telemetry is disabled.
+        if !store().enabled.load(Ordering::Relaxed) {
+            return;
+        }
         if let Some(span) = ctx.span(id) {
             span.extensions_mut().insert(Timings {
                 busy: Duration::ZERO,
@@ -82,6 +88,9 @@ where
     }
 
     fn on_enter(&self, id: &Id, ctx: Context<'_, S>) {
+        if !store().enabled.load(Ordering::Relaxed) {
+            return;
+        }
         if let Some(span) = ctx.span(id)
             && let Some(t) = span.extensions_mut().get_mut::<Timings>()
         {
@@ -92,6 +101,9 @@ where
     }
 
     fn on_exit(&self, id: &Id, ctx: Context<'_, S>) {
+        if !store().enabled.load(Ordering::Relaxed) {
+            return;
+        }
         if let Some(span) = ctx.span(id)
             && let Some(t) = span.extensions_mut().get_mut::<Timings>()
         {

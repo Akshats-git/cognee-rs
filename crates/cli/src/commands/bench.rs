@@ -416,29 +416,31 @@ async fn run_phases(
 
     // ── Add ────────────────────────────────────────────────────────────────
     eprintln!("Phase 1: Adding {n} memories...");
-    let t_add_start = Instant::now();
     start_phase_telemetry(profile_dir);
     let add_prof = start_phase_profiler(profile_dir);
+    let t_add_start = Instant::now();
     if let Err(msg) = phase_add(cm, owner_id, dataset_name, memories).await {
         warn!("Add FAILED: {msg}");
         status.add = format!("failed: {msg}");
     }
+    // Stop the phase timer before writing the flamegraph and telemetry JSON so
+    // the reported time is the workload only, not the artifact generation.
+    let t_add = t_add_start.elapsed().as_secs_f64();
     finish_phase_profiler(add_prof, profile_dir, "add");
     finish_phase_telemetry(profile_dir, "add");
-    let t_add = t_add_start.elapsed().as_secs_f64();
 
     // ── Cognify ──────────────────────────────────────────────────────────
     eprintln!("Phase 2: Running cognify (knowledge graph build)...");
-    let t_cognify_start = Instant::now();
     start_phase_telemetry(profile_dir);
     let cognify_prof = start_phase_profiler(profile_dir);
+    let t_cognify_start = Instant::now();
     if let Err(msg) = phase_cognify(cm, owner_id, dataset_name).await {
         warn!("Cognify FAILED: {msg}");
         status.cognify = format!("failed: {msg}");
     }
+    let t_cognify = t_cognify_start.elapsed().as_secs_f64();
     finish_phase_profiler(cognify_prof, profile_dir, "cognify");
     finish_phase_telemetry(profile_dir, "cognify");
-    let t_cognify = t_cognify_start.elapsed().as_secs_f64();
 
     let t_total = t_add + t_cognify;
 
@@ -462,16 +464,16 @@ async fn run_phases(
 
     // ── Search ───────────────────────────────────────────────────────────
     eprintln!("Phase 3: Running search query...");
-    let t_search_start = Instant::now();
     start_phase_telemetry(profile_dir);
     let search_prof = start_phase_profiler(profile_dir);
+    let t_search_start = Instant::now();
     if let Err(msg) = phase_search(cm, owner_id, dataset_name).await {
         warn!("Search FAILED: {msg}");
         status.search = format!("failed: {msg}");
     }
+    let t_search = t_search_start.elapsed().as_secs_f64();
     finish_phase_profiler(search_prof, profile_dir, "search");
     finish_phase_telemetry(profile_dir, "search");
-    let t_search = t_search_start.elapsed().as_secs_f64();
 
     let success = status.prune == PHASE_OK
         && status.db_setup == PHASE_OK
@@ -647,6 +649,8 @@ fn bench_search_request(
         dataset_ids: None,
         system_prompt: None,
         system_prompt_path: None,
+        // Context-only: return the retrieved context without an LLM completion,
+        // so search stays offline against the recorded cassette.
         only_context: Some(true),
         use_combined_context: Some(false),
         session_id: None,
@@ -670,13 +674,14 @@ fn bench_search_request(
 }
 
 /// Exercise retrieval across representative query types so the search phase is
-/// actually profiled, not just the one graph-completion path.
+/// actually profiled, not just the single query it ran before.
 ///
-/// Runs the no-LLM retrievers (`Chunks`, `Summaries`, pure vector fetch) and the
-/// LLM one (`GraphCompletion`). Under the mocked LLM the completion call is
-/// near-free, so the no-LLM retrievers are what surface the real retrieval cost
-/// (vector KNN plus chunk/summary materialization) in `search.svg`. Per-query
-/// wall times are logged. The phase aggregate is what `search_time` reports.
+/// All queries run with `only_context = true`, so they return the retrieved
+/// context and do not call the LLM for a final completion. This keeps search
+/// offline against the recorded cassette. `Chunks` and `Summaries` are pure
+/// vector fetches; `GraphCompletion` in context-only mode still exercises the
+/// graph retrieval path (triplet search and context assembly). Per-query wall
+/// times are logged. The phase aggregate is what `search_time` reports.
 async fn phase_search(
     cm: &Arc<ComponentManager>,
     owner_id: Uuid,
@@ -705,8 +710,8 @@ async fn phase_search(
     .build();
 
     let query_text = "What is in the document";
-    // No-LLM retrievers first (Chunks/Summaries) so retrieval cost is visible,
-    // then the LLM path (GraphCompletion). Labels feed the per-query log lines.
+    // Vector retrievers first (Chunks, Summaries), then the graph retrieval path
+    // (GraphCompletion in context-only mode). Labels feed the per-query logs.
     let queries = [
         ("chunks", SearchType::Chunks),
         ("summaries", SearchType::Summaries),
