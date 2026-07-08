@@ -83,6 +83,8 @@ impl ComponentRegistry {
                 "postgresql",
             )));
         }
+        #[cfg(feature = "testing")]
+        reg.register_graph(Arc::new(crate::builtins::graph::MockGraphFactory));
 
         // ── llm ───────────────────────────────────────────────────────────
         for id in llm::OPENAI_COMPATIBLE_PROVIDERS {
@@ -253,6 +255,7 @@ fn unsupported_msg(field: &str, provider: &str, supported: &[String]) -> String 
         "graph_database_provider" => match p.as_str() {
             "ladybug" | "kuzu" => " Rebuild with the `ladybug` crate feature to enable it.",
             "postgres" | "postgresql" => " Rebuild with the `pggraph` crate feature to enable it.",
+            "mock" => " Rebuild with the `testing` crate feature to enable it.",
             _ => "",
         },
         "vector_db_provider" => match p.as_str() {
@@ -329,6 +332,11 @@ mod tests {
         for id in ["postgres", "postgresql"] {
             assert!(reg.graph_providers().iter().any(|p| p == id));
         }
+        #[cfg(feature = "testing")]
+        assert!(
+            reg.graph_providers().iter().any(|p| p == "mock"),
+            "the `testing` feature must register the `mock` graph provider"
+        );
 
         // LLM: every OpenAI-compatible provider id.
         for id in crate::builtins::llm::OPENAI_COMPATIBLE_PROVIDERS {

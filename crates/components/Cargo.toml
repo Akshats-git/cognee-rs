@@ -30,8 +30,8 @@ pgvector     = ["cognee-vector/pgvector", "dep:url"]
 pggraph      = ["cognee-graph/postgres", "dep:url"]
 # Record/replay cassette-based mock LLM (MOCK_LLM / COGNEE_RECORD_LLM).
 mock-llm     = ["cognee-llm/mock"]
-# Enables the in-memory `mock` vector provider in `with_builtins()`.
-testing      = ["cognee-vector/testing"]
+# Enables the in-memory `mock` vector and graph providers in `with_builtins()`.
+testing      = ["cognee-vector/testing", "cognee-graph/testing"]
 
 [dependencies]
 cognee-database = { path = "../database", version = "0.1.3" }
